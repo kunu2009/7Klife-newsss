@@ -65,3 +65,10 @@ export interface MicroChallengeState {
   streak: number;
   points: number;
 }
+
+export interface SkillChallenge {
+  id: string;
+  name: string;
+  streak: number;
+  lastCompletedDate?: string; // ISO string
+}

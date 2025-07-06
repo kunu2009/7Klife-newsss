@@ -7,6 +7,7 @@ import ReactFlow, {
   applyEdgeChanges,
   Controls,
   Background,
+  BackgroundVariant,
   MiniMap,
   Connection,
   Edge,
@@ -67,7 +68,7 @@ export function MindMapCanvas() {
       >
         <Controls />
         <MiniMap />
-        <Background variant="dots" gap={12} size={1} />
+        <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
       </ReactFlow>
       <div className="absolute top-4 left-4 z-10">
         <Button onClick={handleAddNode}>

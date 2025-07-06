@@ -41,39 +41,41 @@ export function FlashSummaryDialog({ isOpen, onOpenChange }: FlashSummaryDialogP
   const [todos] = useLocalStorage<TodoItem[]>('sevenk-todos', []);
   const [journalEntries] = useLocalStorage<JournalEntry[]>('sevenk-journal', []);
 
+  // Reset AI summary when dialog closes
   useEffect(() => {
-    if (isOpen) {
-      const fetchSummary = async () => {
-        setIsLoading(true);
-        setAiSummary(null);
-
-        const sevenDaysAgo = subDays(new Date(), 7);
-
-        const completedTodayCount = microChallengeState.challenges.filter(c => c.completed).length;
-        const challengeSummary = `Current streak: ${microChallengeState.streak} days. ${completedTodayCount}/${microChallengeState.challenges.length} challenges completed today. Total points: ${microChallengeState.points}.`;
-        
-        const recentTodos = todos.filter(t => t.dueDate && new Date(t.dueDate) > sevenDaysAgo);
-        const todoSummary = recentTodos.length > 0 ? `Total: ${recentTodos.length}, Completed: ${recentTodos.filter(t => t.completed).length}` : "No tasks with due dates in the last week.";
-
-        const recentJournal = journalEntries.filter(j => new Date(j.date) > sevenDaysAgo);
-        const moodSummary = recentJournal.length > 0 ? `Logged ${recentJournal.length} entries. Moods: ${recentJournal.map(j => j.mood).filter(Boolean).join(', ')}` : "No journal entries in the last week.";
-        
-        const result = await handleGenerateWeeklySummaryAction({
-          challengeData: challengeSummary,
-          todoData: todoSummary,
-          journalData: moodSummary,
-        });
-        
-        setIsLoading(false);
-        if ('summary' in result) {
-          setAiSummary(result.summary);
-        } else {
-          setAiSummary("Could not generate a summary at this time.");
-        }
-      };
-      fetchSummary();
+    if (!isOpen) {
+      setAiSummary(null);
     }
-  }, [isOpen, microChallengeState, todos, journalEntries]);
+  }, [isOpen]);
+
+  const generateAiSummary = async () => {
+    setIsLoading(true);
+    setAiSummary(null);
+
+    const sevenDaysAgo = subDays(new Date(), 7);
+
+    const completedTodayCount = microChallengeState.challenges.filter(c => c.completed).length;
+    const challengeSummary = `Current streak: ${microChallengeState.streak} days. ${completedTodayCount}/${microChallengeState.challenges.length} challenges completed today. Total points: ${microChallengeState.points}.`;
+    
+    const recentTodos = todos.filter(t => t.dueDate && new Date(t.dueDate) > sevenDaysAgo);
+    const todoSummary = recentTodos.length > 0 ? `Total: ${recentTodos.length}, Completed: ${recentTodos.filter(t => t.completed).length}` : "No tasks with due dates in the last week.";
+
+    const recentJournal = journalEntries.filter(j => new Date(j.date) > sevenDaysAgo);
+    const moodSummary = recentJournal.length > 0 ? `Logged ${recentJournal.length} entries. Moods: ${recentJournal.map(j => j.mood).filter(Boolean).join(', ')}` : "No journal entries in the last week.";
+    
+    const result = await handleGenerateWeeklySummaryAction({
+      challengeData: challengeSummary,
+      todoData: todoSummary,
+      journalData: moodSummary,
+    });
+    
+    setIsLoading(false);
+    if ('summary' in result) {
+      setAiSummary(result.summary);
+    } else {
+      setAiSummary("Could not generate a summary at this time.");
+    }
+  };
 
   const challengesToCompleteToday = useMemo(() => {
     return microChallengeState.challenges.filter(c => !c.completed);
@@ -119,14 +121,30 @@ export function FlashSummaryDialog({ isOpen, onOpenChange }: FlashSummaryDialogP
             
             <div className="p-4 rounded-lg bg-card-foreground/5 border border-primary/20">
               <h3 className="font-semibold text-lg mb-2 text-primary">AI Weekly Summary</h3>
-              {isLoading ? (
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-5/6" />
-                  <Skeleton className="h-4 w-4/6" />
-                </div>
+              {aiSummary ? (
+                <p className="text-sm mb-3">{aiSummary}</p>
               ) : (
-                <p className="text-sm">{aiSummary}</p>
+                <p className="text-sm text-muted-foreground mb-3">Click the button below to generate an AI summary of your week.</p>
               )}
+              <Button 
+                onClick={generateAiSummary} 
+                disabled={isLoading}
+                variant="outline"
+                size="sm"
+                className="w-full"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-4 h-4 mr-2" />
+                    Generate AI Summary
+                  </>
+                )}
+              </Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

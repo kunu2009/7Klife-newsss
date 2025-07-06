@@ -11,6 +11,10 @@ import { BookText, Save, History as HistoryIcon, Smile, Tags, Lightbulb } from '
 import useLocalStorage from '@/hooks/use-local-storage';
 import type { JournalEntry } from '@/types';
 
+interface JournalProps {
+  onViewHistory: () => void;
+}
+
 const dailyPrompts = [
     "What was the best part of your day?",
     "What is one thing you're grateful for today?",

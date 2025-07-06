@@ -73,11 +73,7 @@ export function MicroChallenges() {
         setIsLoading(false);
     }, [setState, todayStr, toast]);
 
-    useEffect(() => {
-        if (state.date !== todayStr) {
-            generateNewChallenges();
-        }
-    }, [state.date, todayStr, generateNewChallenges]);
+    // Removed auto-generation - users must manually click "Get New Challenges" button
 
     const handleChallengeToggle = (index: number, completed: boolean) => {
         setState(prevState => {
@@ -142,7 +138,10 @@ export function MicroChallenges() {
                     {isLoading ? (
                          <div className="flex justify-center items-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
                     ) : state.challenges.length === 0 ? (
-                        <div className="text-center text-muted-foreground">No challenges loaded.</div>
+                        <div className="text-center text-muted-foreground space-y-2">
+                            <p>No challenges loaded.</p>
+                            <p className="text-sm">Click "Get New Challenges" to generate some!</p>
+                        </div>
                     ) : (
                         state.challenges.map((challenge, index) => (
                             <div key={index} className="flex items-center gap-3 p-3 rounded-lg border bg-card-foreground/5">
@@ -158,9 +157,15 @@ export function MicroChallenges() {
                         ))
                     )}
                 </div>
-                <Button variant="outline" size="sm" onClick={generateNewChallenges} disabled={isLoading} className="w-full">
+                <Button 
+                    variant={state.challenges.length === 0 ? "default" : "outline"} 
+                    size="sm" 
+                    onClick={generateNewChallenges} 
+                    disabled={isLoading} 
+                    className="w-full"
+                >
                     <Loader2 className={`w-4 h-4 mr-2 ${!isLoading && 'hidden'}`} />
-                    Get New Challenges
+                    {state.challenges.length === 0 ? "Generate Challenges" : "Get New Challenges"}
                 </Button>
             </CardContent>
         </Card>

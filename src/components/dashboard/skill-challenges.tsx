@@ -90,7 +90,7 @@ export function SkillChallenges() {
             </div>
           ) : (
             challenges.map(challenge => {
-              const completedToday = challenge.lastCompletedDate && isToday(parseISO(challenge.lastCompletedDate));
+              const completedToday = !!(challenge.lastCompletedDate && isToday(parseISO(challenge.lastCompletedDate)));
               return (
                 <div key={challenge.id} className="p-4 rounded-lg border bg-card-foreground/5 flex justify-between items-center">
                   <div>
